@@ -1,38 +1,97 @@
-# Food Ordering System
+# Visitor & External Appointment Management System
 
-A simple web-based food ordering interface built with HTML, CSS, and JavaScript. Users can browse a menu, add items to a shopping cart, and place an order without any backend or database.
+A full-stack digital platform for scheduling, approving, managing, and monitoring external visitor appointments.
+
+## Tech Stack
+
+- **Frontend:** React 18, Vite, Tailwind CSS, Framer Motion, Recharts
+- **Backend:** Node.js, Express, Socket.io
+- **Database:** MySQL
 
 ## Features
 
-- Menu display with food names, prices, and images
-- Add to cart functionality
-- Shopping cart review with remove item option
-- Instant total price calculation
-- Responsive layout for mobile, tablet, and desktop
-- Clean user interface with simple styling
-- No backend required; works entirely in the browser
+- Public appointment booking portal with multi-step wizard
+- Multi-level approval workflow
+- QR code visitor passes and reference tracking
+- Real-time reception desk with live visitor board
+- Check-in / check-out management
+- Role-based dashboards (Admin, Manager, Employee, Reception, Security)
+- Analytics, reporting, and audit logs
+- Blacklist and security verification
+- In-app notifications
 
-## How to use
+## Prerequisites
 
-1. Open `index.html` in your browser.
-2. Click **Add to Cart** for any menu item.
-3. Review items in the cart and place the order.
+- Node.js 18+
+- MySQL 8+ (or MariaDB)
 
-## Files
+## Setup
 
-- `index.html` - main page structure
-- `styles.css` - page styling and responsive layout
-- `script.js` - menu data, cart logic, and price calculation
-- `api/data.php` - backend endpoint that returns menu items
-- `api/order.php` - backend endpoint that receives order data and returns confirmation
+### 1. Database
 
-## Backend Overview
+Create the database and seed demo data:
 
-The project includes a simple PHP backend for XAMPP:
+```bash
+cd Backend
+npm install
+cp .env.example .env
+# Edit .env with your MySQL credentials
+npm run db:setup
+```
 
-- `api/data.php` returns the menu item list as JSON.
-- `api/order.php` accepts POST requests with cart items and total, then returns a JSON order confirmation.
+### 2. Backend
 
-## Project Overview
+```bash
+cd Backend
+npm run dev
+```
 
-This project is designed for beginners to learn how to build interactive web applications using only front-end code. It simulates a food ordering experience with a menu, cart, and instant total calculation.
+API runs at `http://localhost:5000`
+
+### 3. Frontend
+
+```bash
+cd Frontend
+npm install
+npm run dev
+```
+
+App runs at `http://localhost:5173`
+
+## Demo Accounts
+
+Password for all accounts: **Password123!**
+
+| Email                 | Role      |
+| --------------------- | --------- |
+| admin@visitor.com     | Admin     |
+| michael.c@visitor.com | Employee  |
+| lisa.t@visitor.com    | Reception |
+| robert.g@visitor.com  | Security  |
+
+## Project Structure
+
+```
+Visitor/
+├── Frontend/        # React frontend
+├── Backend/         # Express API
+├── database/        # SQL schema & seed
+└── README.md
+```
+
+## API Endpoints
+
+| Method | Endpoint                      | Description         |
+| ------ | ----------------------------- | ------------------- |
+| POST   | /api/auth/login               | Staff login         |
+| GET    | /api/departments              | List departments    |
+| POST   | /api/appointments             | Book appointment    |
+| GET    | /api/appointments/track       | Track by reference  |
+| PATCH  | /api/appointments/:id/approve | Approve appointment |
+| POST   | /api/checkin/scan             | Check-in visitor    |
+| GET    | /api/reports/dashboard        | Analytics data      |
+| GET    | /api/checkin/live-board       | Reception board     |
+
+## License
+
+MIT

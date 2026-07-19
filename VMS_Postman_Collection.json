@@ -1,0 +1,407 @@
+{
+  "info": {
+    "_postman_id": "8c59f0f9-2b0e-4fae-9fa9-43c2fb1c4cd2",
+    "name": "Visitor Management System (VMS) API",
+    "description": "Integration testing collection for VMS core endpoints (Auth, Visitors, Appointments, Approvals, Checkin/Checkout, and Dashboards).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Authentication & Session",
+      "item": [
+        {
+          "name": "User Registration",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Jane Doe\",\n  \"email\": \"jane.doe@email.com\",\n  \"password\": \"Password123!\",\n  \"phone\": \"+1-555-8822\",\n  \"role\": \"visitor\",\n  \"company\": \"Global Tech Corp\",\n  \"idType\": \"Passport\",\n  \"idNumber\": \"PP-9821034\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "User Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();",
+                  "if (response && response.token) {",
+                  "    pm.collectionVariables.set(\"bearer_token\", response.token);",
+                  "    pm.test(\"Token saved successfully\", () => {",
+                  "        pm.expect(response.token).to.be.a('string');",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@visitor.com\",\n  \"password\": \"Password123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Get Current Profile",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{bearer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/auth/me",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "me"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Visitor Profiles",
+      "item": [
+        {
+          "name": "List All Visitors",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{bearer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/visitors",
+              "host": ["{{base_url}}"],
+              "path": ["api", "visitors"]
+            }
+          }
+        },
+        {
+          "name": "Blacklist a Visitor",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{bearer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"visitorId\": 2,\n  \"reason\": \"Failed to comply with safety induction guidelines.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/visitors/2/blacklist",
+              "host": ["{{base_url}}"],
+              "path": ["api", "visitors", "2", "blacklist"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Appointments & Scheduling",
+      "item": [
+        {
+          "name": "Create Appointment",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();",
+                  "if (response && response.data && response.data.id) {",
+                  "    pm.collectionVariables.set(\"last_appointment_id\", response.data.id);",
+                  "    pm.collectionVariables.set(\"last_reference_code\", response.data.reference_code || response.data.referenceCode);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{bearer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"visitorId\": 1,\n  \"hostId\": 2,\n  \"scheduledStart\": \"2026-07-08 10:00:00\",\n  \"scheduledEnd\": \"2026-07-08 11:30:00\",\n  \"priority\": \"MEDIUM\",\n  \"purpose\": \"Quarterly business review alignment\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/appointments",
+              "host": ["{{base_url}}"],
+              "path": ["api", "appointments"]
+            }
+          }
+        },
+        {
+          "name": "Approve Appointment",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{bearer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"comment\": \"On-site documentation verified. Host approved.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/appointments/{{last_appointment_id}}/approve",
+              "host": ["{{base_url}}"],
+              "path": ["api", "appointments", "{{last_appointment_id}}", "approve"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Check-In & Check-Out",
+      "item": [
+        {
+          "name": "Scan Check-In",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{bearer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"referenceCode\": \"{{last_reference_code}}\",\n  \"badgeNumber\": \"BADGE-998822\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/checkin/scan",
+              "host": ["{{base_url}}"],
+              "path": ["api", "checkin", "scan"]
+            }
+          }
+        },
+        {
+          "name": "Active Checkin Lookup",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{bearer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/checkin/active/{{last_reference_code}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "checkin", "active", "{{last_reference_code}}"]
+            }
+          }
+        },
+        {
+          "name": "Check-Out",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{bearer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"checkoutMethod\": \"MANUAL\",\n  \"remarks\": \"Smooth checkout. Returned badge.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/checkin/{{last_appointment_id}}/checkout",
+              "host": ["{{base_url}}"],
+              "path": ["api", "checkin", "{{last_appointment_id}}", "checkout"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Analytics & Dashboard",
+      "item": [
+        {
+          "name": "Get Dashboard Metrics",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{bearer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/reports/dashboard",
+              "host": ["{{base_url}}"],
+              "path": ["api", "reports", "dashboard"]
+            }
+          }
+        },
+        {
+          "name": "Get Audit Logs",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{bearer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/reports/audit-logs",
+              "host": ["{{base_url}}"],
+              "path": ["api", "reports", "audit-logs"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:5000",
+      "type": "string"
+    },
+    {
+      "key": "bearer_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "last_appointment_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "last_reference_code",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}
